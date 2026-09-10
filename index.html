@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -72,11 +73,12 @@
   }
   .nav-logo{
     font-family:'Fraunces',serif; font-size:19px; font-weight:500; color:var(--navy);
+    flex:none; margin-right:28px; white-space:nowrap;
   }
-  .nav-links{display:flex; gap:34px; align-items:center;}
+  .nav-links{display:flex; gap:26px; align-items:center; flex-wrap:nowrap;}
   .nav-links a{
-    font-size:14.5px; color:var(--muted); font-weight:500;
-    position:relative; padding:4px 0;
+    font-size:14px; color:var(--muted); font-weight:500;
+    position:relative; padding:4px 0; white-space:nowrap;
   }
   .nav-links a:hover{color:var(--navy);}
   .nav-links a::after{
@@ -85,39 +87,68 @@
   }
   .nav-links a:hover::after{width:100%;}
   .nav-cta{
-    background:var(--navy); color:#fff !important; padding:9px 18px;
-    border-radius:var(--radius); font-size:14px;
+    background:var(--navy); color:#fff !important; padding:9px 16px;
+    border-radius:var(--radius); font-size:13.5px; white-space:nowrap; flex:none;
   }
   .nav-cta::after{display:none;}
   .nav-cta:hover{background:var(--teal-deep);}
-  .lang-switch{
-    display:flex; align-items:center; gap:2px; border:1px solid var(--line-dark);
-    border-radius:var(--radius); padding:2px; margin-left:4px;
+  .lang-dropdown{position:relative; flex:none;}
+  .lang-current{
+    display:flex; align-items:center; gap:6px; border:1px solid var(--line-dark);
+    border-radius:var(--radius); padding:8px 12px; background:var(--panel);
+    font-size:12.5px; font-weight:700; color:var(--navy); cursor:pointer;
+    white-space:nowrap; font-family:'Inter',sans-serif; letter-spacing:0.02em;
+    transition:border-color .15s ease;
   }
-  .lang-btn{
-    background:none; border:none; cursor:pointer; font-size:12px; font-weight:700;
-    color:var(--muted); padding:6px 9px; border-radius:2px; font-family:'Inter',sans-serif;
-    letter-spacing:0.02em; transition:all .15s ease;
+  .lang-current:hover{border-color:var(--teal);}
+  .lang-caret{width:12px; height:12px; transition:transform .2s ease; flex:none;}
+  .lang-dropdown.open .lang-caret{transform:rotate(180deg);}
+  .lang-menu{
+    position:absolute; top:calc(100% + 8px); right:0; background:var(--panel);
+    border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:0 10px 30px rgba(10,20,28,0.14); min-width:150px; padding:6px;
+    display:none; z-index:60;
   }
-  .lang-btn:hover{color:var(--navy);}
-  .lang-btn.active{background:var(--navy); color:#fff;}
+  .lang-dropdown.open .lang-menu{display:block;}
+  .lang-option{
+    display:flex; justify-content:space-between; align-items:center; width:100%;
+    text-align:left; background:none; border:none; padding:10px 12px;
+    font-size:13.5px; color:var(--navy-2); cursor:pointer; border-radius:2px;
+    font-family:'Inter',sans-serif; white-space:nowrap;
+  }
+  .lang-option:hover{background:var(--bg-alt);}
+  .lang-option.active{background:var(--teal-tint); color:var(--teal-deep); font-weight:600;}
+  .lo-code{font-size:11px; color:var(--muted); font-weight:600; margin-left:10px;}
+  .lang-option.active .lo-code{color:var(--teal-deep);}
   .nav-toggle{
     display:none; background:none; border:none; cursor:pointer; padding:8px;
   }
   .nav-toggle span{
     display:block; width:22px; height:2px; background:var(--navy); margin:5px 0;
   }
+  @media (min-width:901px) and (max-width:1320px){
+    .nav-logo{margin-right:16px; font-size:17px;}
+    .nav-links{gap:16px;}
+    .nav-links a{font-size:13px;}
+    .nav-cta{padding:8px 12px; font-size:13px;}
+    .lang-current{padding:7px 10px; font-size:11.5px;}
+  }
+  @media (min-width:901px) and (max-width:1150px){
+    .nav-links{gap:12px;}
+    .nav-links a{font-size:12.5px;}
+  }
   @media (max-width:900px){
     .nav-links{
       position:fixed; top:72px; left:0; right:0; bottom:0;
       background:var(--bg); flex-direction:column; align-items:flex-start;
       padding:36px 28px; gap:26px; transform:translateX(100%);
-      transition:transform .3s ease; overflow-y:auto;
+      transition:transform .3s ease; overflow-y:auto; flex-wrap:wrap;
     }
     .nav-links.open{transform:translateX(0);}
     .nav-links a{font-size:20px;}
     .nav-toggle{display:block;}
-    .lang-switch{margin-left:0; margin-top:10px;}
+    .lang-dropdown{margin-top:10px;}
+    .lang-menu{left:0; right:auto;}
   }
 
   /* ---------- HERO ---------- */
@@ -619,10 +650,16 @@
       <a href="#competencias" data-i18n="nav.skills">Competências</a>
       <a href="#ia" data-i18n="nav.ia">IA</a>
       <a href="#contato" class="nav-cta" data-i18n="nav.cta">Vamos conversar</a>
-      <div class="lang-switch" id="langSwitch">
-        <button type="button" data-lang="pt" class="lang-btn active">PT</button>
-        <button type="button" data-lang="en" class="lang-btn">EN</button>
-        <button type="button" data-lang="es" class="lang-btn">ES</button>
+      <div class="lang-dropdown" id="langSwitch">
+        <button type="button" class="lang-current" id="langCurrentBtn" aria-haspopup="true" aria-expanded="false">
+          <span id="langCurrentLabel">PT</span>
+          <svg class="lang-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="lang-menu" id="langMenu">
+          <button type="button" data-lang="pt" data-label="PT" class="lang-option active">Português <span class="lo-code">PT</span></button>
+          <button type="button" data-lang="en" data-label="EN" class="lang-option">English <span class="lo-code">EN</span></button>
+          <button type="button" data-lang="es" data-label="ES" class="lang-option">Español <span class="lo-code">ES</span></button>
+        </div>
       </div>
     </nav>
     <button class="nav-toggle" id="navToggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
@@ -2416,14 +2453,31 @@ function applyLanguage(lang) {
     }
   }
 
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  document.querySelectorAll('.lang-option').forEach(opt => {
+    opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
   });
+  const activeOpt = document.querySelector('.lang-option[data-lang="' + lang + '"]');
+  const langLabel = document.getElementById('langCurrentLabel');
+  if (activeOpt && langLabel) langLabel.textContent = activeOpt.getAttribute('data-label');
 
 }
 
-document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => applyLanguage(btn.getAttribute('data-lang')));
+const langDropdown = document.getElementById('langSwitch');
+const langCurrentBtn = document.getElementById('langCurrentBtn');
+langCurrentBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  langDropdown.classList.toggle('open');
+  langCurrentBtn.setAttribute('aria-expanded', langDropdown.classList.contains('open'));
+});
+document.querySelectorAll('.lang-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    applyLanguage(opt.getAttribute('data-lang'));
+    langDropdown.classList.remove('open');
+    langCurrentBtn.setAttribute('aria-expanded', 'false');
+  });
+});
+document.addEventListener('click', (e) => {
+  if (!langDropdown.contains(e.target)) langDropdown.classList.remove('open');
 });
 
 </script>
