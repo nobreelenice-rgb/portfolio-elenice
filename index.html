@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -594,6 +593,230 @@
   .pilar-card h4{font-size:19px; color:#fff; margin-bottom:12px; font-weight:500;}
   .pilar-card p{font-size:14.5px; color:#C9D6DC; line-height:1.62;}
   .pilar-card .pilar-case{font-size:12.5px; color:#8CA0A9; margin-top:14px; font-weight:500;}
+
+  /* ---------- CASE SLIDES OVERLAY ---------- */
+  .case-overlay{
+    position:fixed; inset:0; z-index:900;
+    background:var(--navy);
+    display:none; opacity:0;
+    transition:opacity .25s ease, background .35s ease;
+  }
+  .case-overlay.open{ display:flex; flex-direction:column; opacity:1; }
+  .case-overlay.cso-light{ background:var(--teal-tint); }
+
+  .cso-close{
+    position:absolute; top:20px; right:20px; z-index:30;
+    width:42px; height:42px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.06); color:#fff; font-size:18px; line-height:1;
+    cursor:pointer; transition:background .15s ease, border-color .15s ease;
+  }
+  .cso-close:hover{ background:rgba(255,255,255,0.14); border-color:var(--teal); }
+  .cso-light .cso-close{ border-color:rgba(13,36,54,0.22); color:var(--navy); background:rgba(13,36,54,0.05); }
+  .cso-light .cso-close:hover{ background:rgba(13,36,54,0.1); }
+
+  .cso-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:30;
+    width:52px; height:52px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.06); color:#fff; font-size:26px; line-height:1;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, border-color .15s ease, opacity .15s ease;
+  }
+  .cso-arrow:hover{ background:rgba(255,255,255,0.14); border-color:var(--teal); }
+  .cso-arrow:disabled{ opacity:0.22; cursor:default; }
+  .cso-prev{ left:16px; }
+  .cso-next{ right:16px; }
+  .cso-light .cso-arrow{ border-color:rgba(13,36,54,0.22); color:var(--navy); background:rgba(13,36,54,0.05); }
+  .cso-light .cso-arrow:hover{ background:rgba(13,36,54,0.1); }
+  @media (max-width:720px){
+    .cso-arrow{ width:40px; height:40px; font-size:20px; }
+    .cso-prev{ left:6px; } .cso-next{ right:6px; }
+    .cso-close{ top:14px; right:14px; }
+  }
+
+  /* Trilha de fases (desktop) — mostra em que etapa da história o stakeholder está */
+  .cso-rail{
+    position:relative; z-index:15; flex:none;
+    display:flex; align-items:center;
+    max-width:980px; width:100%; margin:0 auto;
+    padding:26px 7vw 0;
+    box-sizing:border-box;
+  }
+  @media (max-width:900px){ .cso-rail{ display:none; } }
+  .cso-rail-step{ position:relative; display:flex; align-items:center; flex:1; }
+  .cso-rail-step:last-child{ flex:0 0 auto; }
+  .cso-rail-dot{
+    width:8px; height:8px; border-radius:50%; flex:none; padding:0; cursor:pointer;
+    background:rgba(255,255,255,0.2); border:1.5px solid rgba(255,255,255,0.32);
+    transition:background .25s ease, border-color .25s ease, transform .25s ease;
+  }
+  .cso-rail-step.done .cso-rail-dot{ background:rgba(255,255,255,0.65); border-color:rgba(255,255,255,0.65); }
+  .cso-rail-step.active .cso-rail-dot{ background:var(--teal); border-color:var(--teal); transform:scale(1.55); }
+  .cso-rail-step.active .cso-rail-dot.amber{ background:#E3B064; border-color:#E3B064; }
+  .cso-rail-line{ height:1px; flex:1; background:rgba(255,255,255,0.16); margin:0 3px; transition:background .3s ease; }
+  .cso-rail-line.done{ background:rgba(255,255,255,0.55); }
+  .cso-rail-label{
+    position:absolute; top:16px; left:50%; transform:translateX(-50%) translateY(-3px);
+    font-size:11px; color:rgba(255,255,255,0.55); white-space:nowrap; letter-spacing:.01em;
+    opacity:0; transition:opacity .2s ease, transform .2s ease; pointer-events:none;
+  }
+  .cso-rail-step.active .cso-rail-label{ opacity:1; transform:translateX(-50%) translateY(0); color:#fff; }
+  .cso-light .cso-rail-dot{ background:rgba(13,36,54,0.18); border-color:rgba(13,36,54,0.3); }
+  .cso-light .cso-rail-step.done .cso-rail-dot{ background:rgba(13,36,54,0.5); border-color:rgba(13,36,54,0.5); }
+  .cso-light .cso-rail-line{ background:rgba(13,36,54,0.14); }
+  .cso-light .cso-rail-line.done{ background:rgba(13,36,54,0.45); }
+  .cso-light .cso-rail-label{ color:rgba(13,36,54,0.55); }
+  .cso-light .cso-rail-step.active .cso-rail-label{ color:var(--navy); }
+
+  .cso-viewport{ flex:1; width:100%; overflow:hidden; }
+  .cso-track{
+    display:flex; height:100%;
+    transition:transform .5s cubic-bezier(.65,0,.35,1);
+    will-change:transform;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .cso-track{ transition:none; }
+    .cso-slide.cso-active .cso-inner, .cso-active .cso-metrics > div{ animation:none !important; }
+  }
+
+  .cso-slide{
+    flex:0 0 100%; max-width:100%; height:100%;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:72px 7vw 60px; box-sizing:border-box;
+  }
+  .cso-inner{
+    position:relative; max-width:760px; margin:0 auto; width:100%;
+    min-height:calc(100% - 20px); display:flex; flex-direction:column; justify-content:center;
+  }
+  .cso-inner.layout-grid, .cso-inner.layout-links{ max-width:960px; }
+  .cso-inner.layout-photo{ max-width:980px; }
+  .cso-inner.layout-video{ max-width:800px; }
+  .cso-inner.layout-cover{ max-width:880px; }
+  .cso-inner.layout-synthesis{ max-width:680px; text-align:center; }
+
+  @keyframes csoRise{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:translateY(0); } }
+  .cso-slide.cso-active .cso-inner{ animation:csoRise .55s cubic-bezier(.16,.84,.34,1) both; }
+
+  /* Numeração fantasma — marca a sequência sem competir com o conteúdo */
+  .cso-slide-ghost{
+    position:absolute; top:-10px; right:0; z-index:-1;
+    font-family:'Fraunces',serif; font-weight:500; line-height:1;
+    font-size:clamp(84px,12vw,160px); color:rgba(255,255,255,0.045);
+    pointer-events:none; user-select:none;
+  }
+  .cso-light .cso-slide-ghost{ color:rgba(13,36,54,0.05); }
+
+  .case-overlay .co-name{ color:#fff; }
+  .case-overlay .co-logo-plate{ background:#fff; }
+
+  .cso-eyebrow{ font-size:13.5px; font-weight:600; color:var(--teal); margin-bottom:16px; letter-spacing:.01em; }
+
+  .cso-phase-tag{
+    display:inline-block; font-size:12.5px; font-weight:600; color:var(--teal);
+    border-top:2px solid var(--teal); padding-top:9px; margin-bottom:20px; letter-spacing:.01em;
+  }
+  .cso-phase-tag.amber{ color:#E3B064; border-top-color:#E3B064; font-weight:700; }
+  .cso-phase-tag.light{ color:var(--teal-deep); border-top-color:var(--teal-deep); }
+
+  .cso-section-title{
+    font-family:'Fraunces',serif; font-weight:600; color:#fff;
+    font-size:clamp(26px,3.6vw,40px); line-height:1.18; letter-spacing:-.01em;
+    margin-bottom:26px; max-width:640px;
+  }
+
+  .cso-text{ color:#B9C6CB; font-size:15.5px; line-height:1.68; }
+  .cso-text p{ margin-bottom:15px; }
+  .cso-text p:last-child{ margin-bottom:0; }
+  .cso-text > p:first-of-type{ font-size:20px; line-height:1.58; font-weight:400; color:#fff; }
+  .cso-text ul{ list-style:none; margin:0 0 15px 0; padding:0; }
+  .cso-text li{ position:relative; padding-left:22px; color:#B9C6CB; font-size:15.5px; line-height:1.58; margin-bottom:10px; }
+  .cso-text li::before{ content:''; position:absolute; left:0; top:10px; width:11px; height:1.5px; background:var(--teal); }
+  .cso-text b{ color:#fff; font-weight:600; }
+  mark.cso-kw{ background:rgba(46,139,126,0.22); color:#fff; font-weight:600; padding:0 3px; border-radius:2px; }
+  .cso-light mark.cso-kw{ background:rgba(31,100,89,0.14); color:var(--navy); }
+
+  .case-overlay .hyp-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px; }
+  @media (max-width:680px){ .case-overlay .hyp-grid{ grid-template-columns:1fr; } }
+  .case-overlay .hyp-card{
+    background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.14);
+    border-left:3px solid var(--teal); border-radius:2px; padding:20px 20px 18px;
+  }
+  .case-overlay .hyp-card b{ display:block; font-family:'Fraunces',serif; font-weight:500; font-size:22px; color:var(--teal); margin-bottom:8px; }
+  .case-overlay .hyp-card p{ font-size:14.5px; line-height:1.56; color:#D8E3E7; margin:0; }
+
+  .case-overlay .case-photos img{ border-color:rgba(255,255,255,0.14); }
+  .case-overlay .case-link-item{ border-color:rgba(255,255,255,0.16); background:rgba(255,255,255,0.03); transition:border-color .15s ease, transform .15s ease; }
+  .case-overlay .case-link-item:hover{ border-color:var(--teal); transform:translateY(-2px); }
+  .case-overlay .cli-title{ color:#fff; }
+  .case-overlay .cli-url{ color:var(--teal); }
+  .case-overlay .video-caption, .case-overlay .case-photo-cap{ color:#9FB2BB; }
+
+  /* Slide de resultado — único momento em âmbar, reservado para o impacto de negócio */
+  .cso-result-stat{ position:relative; display:inline-block; margin:2px 0 30px; }
+  .cso-result-stat .n{
+    font-family:'Fraunces',serif; font-weight:500; line-height:1; letter-spacing:-.01em;
+    font-size:clamp(44px,6.4vw,78px); color:#F2C783; text-shadow:0 0 46px rgba(227,176,100,0.4);
+  }
+  .cso-result-stat .l{ font-size:13.5px; color:#E5CDA1; margin-top:10px; max-width:380px; line-height:1.5; }
+
+  .cso-metrics{ display:flex; flex-wrap:wrap; gap:32px; margin:28px 0 6px; }
+  .cso-metrics > div{ animation:csoRise .5s cubic-bezier(.16,.84,.34,1) both; }
+  .cso-active .cso-metrics > div:nth-child(2){ animation-delay:.08s; }
+  .cso-active .cso-metrics > div:nth-child(3){ animation-delay:.16s; }
+  .cso-active .cso-metrics > div:nth-child(4){ animation-delay:.24s; }
+  .cso-metrics .n{ font-family:'Fraunces',serif; font-size:clamp(27px,3.4vw,38px); color:#fff; font-weight:500; font-variant-numeric:tabular-nums; }
+  .cso-metrics .l{ font-size:13px; color:#9FB2BB; max-width:210px; margin-top:5px; line-height:1.4; }
+
+  .cso-squad{ display:flex; flex-wrap:wrap; gap:8px; margin-top:28px; }
+  .cso-squad span{ font-size:12.5px; color:#D8E3E7; border:1px solid rgba(255,255,255,0.2); border-radius:var(--radius); padding:6px 12px; }
+
+  /* Slide de capa (intro) — headline, gráfico ascendente e resumo do desafio */
+  .cso-cover-glow{
+    position:absolute; z-index:-1; inset:-25% -10% auto -10%; height:75%;
+    background:radial-gradient(ellipse at 26% 18%, rgba(46,139,126,0.38), transparent 62%);
+    filter:blur(6px); pointer-events:none;
+  }
+  .cso-cover-chart{ position:absolute; z-index:-1; top:0%; right:-6%; width:40%; height:32%; opacity:.13; pointer-events:none; }
+  .cso-cover-chart polyline{ fill:none; stroke:var(--teal); stroke-width:1.5; vector-effect:non-scaling-stroke; }
+  .cso-cover-chart .cso-cover-dot{ fill:var(--teal); }
+  .cso-cover-chart .cso-cover-pulse{ fill:var(--teal); opacity:.5; transform-origin:400px 8px; animation:csoPulse 2.8s ease-out infinite; }
+  @keyframes csoPulse{ 0%{ transform:scale(1); opacity:.45; } 100%{ transform:scale(3); opacity:0; } }
+  @media (max-width:860px){ .cso-cover-chart{ display:none; } }
+
+  .cso-cover-top{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:44px; }
+  .cso-cover-title{
+    font-family:'Fraunces',serif; font-weight:500; color:#fff;
+    font-size:clamp(32px,5vw,54px); line-height:1.08; letter-spacing:-.01em;
+    max-width:620px; margin-bottom:22px;
+  }
+  .cso-cover-lede{ font-size:18.5px; line-height:1.6; color:#E2E9EB; max-width:560px; }
+  .cso-cover-hint{ margin-top:38px; font-size:12.5px; color:rgba(255,255,255,0.4); letter-spacing:.01em; }
+
+  /* Slide de encerramento — inverte o tom para marcar a leitura estratégica */
+  .cso-synthesis-quote{
+    font-family:'Fraunces',serif; font-weight:500; color:var(--navy);
+    font-size:clamp(23px,3.2vw,36px); line-height:1.38; margin:26px auto 36px;
+  }
+  .cso-synthesis-back{
+    font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; color:var(--teal-deep);
+    background:none; border:1px solid var(--teal-deep); border-radius:var(--radius);
+    padding:11px 22px; cursor:pointer; transition:background .15s ease, color .15s ease;
+  }
+  .cso-synthesis-back:hover{ background:var(--teal-deep); color:#fff; }
+
+  .cso-footer{
+    position:relative; z-index:20; flex:none;
+    display:flex; align-items:center; justify-content:center; gap:16px;
+    padding:14px 20px 22px;
+  }
+  .cso-dots{ display:flex; gap:8px; }
+  .cso-dot{ width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.25); border:none; cursor:pointer; padding:0; transition:background .15s ease, transform .15s ease; }
+  .cso-dot.active{ background:var(--teal); transform:scale(1.3); }
+  .cso-light .cso-dot{ background:rgba(13,36,54,0.22); }
+  .cso-light .cso-dot.active{ background:var(--teal-deep); }
+  .cso-counter{ font-size:12.5px; color:#9FB2BB; min-width:90px; text-align:center; }
+  .cso-light .cso-counter{ color:var(--teal-deep); }
   @media (max-width:820px){ .pilares-grid{grid-template-columns:1fr;} }
 
   .back-to-top{
@@ -1285,18 +1508,21 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
 </button>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal-head">
-      <div>
-        <div class="case-company" id="modalCompany" style="margin-bottom:14px;"></div>
-        <div class="mh-eyebrow" id="modalEyebrow"></div>
-        <h3 id="modalTitle"></h3>
-      </div>
-      <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
+<!-- CASE SLIDES OVERLAY -->
+<div class="case-overlay" id="caseOverlay" aria-hidden="true">
+  <button class="cso-close" id="csoClose" aria-label="Fechar">✕</button>
+  <button class="cso-arrow cso-prev" id="csoPrev" aria-label="Slide anterior">‹</button>
+  <button class="cso-arrow cso-next" id="csoNext" aria-label="Próximo slide">›</button>
+
+  <div class="cso-rail" id="csoRail"></div>
+
+  <div class="cso-viewport">
+    <div class="cso-track" id="csoTrack"></div>
+  </div>
+
+  <div class="cso-footer">
+    <div class="cso-dots" id="csoDots"></div>
+    <div class="cso-counter" id="csoCounter"></div>
   </div>
 </div>
 
@@ -1791,72 +2017,321 @@ const casesES = {
 const casesI18n = { pt: casesPT, en: casesEN, es: casesES };
 let currentLang = "pt";
 
-// ---- Modal logic ----
-const overlay = document.getElementById('modalOverlay');
-const modalCompany = document.getElementById('modalCompany');
-const modalEyebrow = document.getElementById('modalEyebrow');
-const modalTitle = document.getElementById('modalTitle');
-const modalBody = document.getElementById('modalBody');
-const modalClose = document.getElementById('modalClose');
+// ---- Case slides overlay ----
+(function(){
+  const overlay   = document.getElementById('caseOverlay');
+  const track     = document.getElementById('csoTrack');
+  const railEl    = document.getElementById('csoRail');
+  const dotsEl    = document.getElementById('csoDots');
+  const counterEl = document.getElementById('csoCounter');
+  const closeBtn  = document.getElementById('csoClose');
+  const prevBtn   = document.getElementById('csoPrev');
+  const nextBtn   = document.getElementById('csoNext');
 
-function openCase(key){
-  const c = casesI18n[currentLang][key];
-  if(!c) return;
-  modalCompany.innerHTML = c.company || '';
-  modalEyebrow.innerHTML = c.eyebrow;
-  modalTitle.textContent = c.title;
+  const uiText = {
+    pt: { close:'Fechar', prev:'Slide anterior', next:'Próximo slide', counter:(n,t)=>`Slide ${n} de ${t}`,
+      hint:'Use as setas, deslize ou clique nos pontos para navegar', backToCases:'Voltar aos cases' },
+    en: { close:'Close', prev:'Previous slide', next:'Next slide', counter:(n,t)=>`Slide ${n} of ${t}`,
+      hint:'Use the arrows, swipe, or click the dots to navigate', backToCases:'Back to cases' },
+    es: { close:'Cerrar', prev:'Diapositiva anterior', next:'Siguiente diapositiva', counter:(n,t)=>`Diapositiva ${n} de ${t}`,
+      hint:'Usa las flechas, desliza o haz clic en los puntos para navegar', backToCases:'Volver a los casos' }
+  };
 
-  let html = '';
-  if(c.challenge){
-    html += `<p class="modal-hero-text">${c.challenge}</p>`;
-  }
-  if(c.metrics && c.metrics.length){
-    html += '<div class="modal-metrics">';
-    c.metrics.forEach(m => {
-      html += `<div><div class="n">${m[0]}</div><div class="l">${m[1]}</div></div>`;
+  // Fases da narrativa — o mesmo vocabulário em todos os cases reforça que existe um método, não um caso isolado.
+  const PHASE_META = {
+    cover:      { pt:'Visão geral',              en:'Overview',              es:'Visión general' },
+    context:    { pt:'Diagnóstico',               en:'Diagnosis',             es:'Diagnóstico' },
+    discovery:  { pt:'Descoberta',                en:'Discovery',             es:'Descubrimiento' },
+    goals:      { pt:'Metas',                     en:'Goals',                 es:'Metas' },
+    hypothesis: { pt:'Hipóteses',                 en:'Hypotheses',            es:'Hipótesis' },
+    validation: { pt:'Validação',                 en:'Validation',            es:'Validación' },
+    strategy:   { pt:'Estratégia & execução',     en:'Strategy & execution',  es:'Estrategia & ejecución' },
+    learning:   { pt:'Aprendizados',               en:'Learnings',             es:'Aprendizajes' },
+    result:     { pt:'Resultado',                 en:'Result',                es:'Resultado' },
+    proof:      { pt:'Prova & reconhecimento',     en:'Proof & recognition',   es:'Prueba & reconocimiento' },
+    synthesis:  { pt:'Leitura estratégica',        en:'Strategic takeaway',    es:'Lectura estratégica' }
+  };
+  // Ordem das seções de cada case, na mesma sequência em pt/en/es (o array de sections tem o mesmo tamanho nos 3 idiomas).
+  const CASE_PHASES = {
+    premium:    ['context','discovery','hypothesis','validation','strategy','learning','proof'],
+    reativacao: ['context','discovery','strategy','result','proof'],
+    b2b:        ['context','discovery','strategy','result','proof'],
+    maisenvios: ['context','goals','strategy','result']
+  };
+
+  let activeCaseKey = null;
+  let slides = [];
+  let slideIndex = 0;
+
+  // ---- Destaque de palavras-chave (opera só em nós de texto puro; nunca altera tags/atributos/links) ----
+  const KEY_TERMS = [
+    'GMV','CAC','LTV','ROI','NPS','ICP','GTM','ABM','ARR','MRR','CRM','TAM','SAM','SOM','RFM','KPI',
+    'churn','pipeline','funil','pricing','score','hackathon','onboarding','lifecycle','cohort','cohorts'
+  ];
+  const KW_PATTERNS = [
+    /R\$\s?\d[\d.,]*\s?(?:mil|milhões|bi|M|K)?/g,     // valores em reais
+    /US\$\s?\d[\d.,]*\s?(?:mil|milhões|bi|M|K)?/g,    // valores em dólar
+    /\d+(?:,\d+)?%/g,                                  // percentuais
+    /\d+(?:,\d+)?x\b/gi,                               // multiplicadores (2,5x)
+    new RegExp('\\b(' + KEY_TERMS.join('|') + ')\\b', 'gi')
+  ];
+  function findKeywordMatches(text){
+    const matches = [];
+    KW_PATTERNS.forEach(re => {
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(text))) {
+        matches.push({ start: m.index, end: m.index + m[0].length });
+        if (m[0].length === 0) re.lastIndex++;
+      }
     });
-    html += '</div>';
+    matches.sort((a, b) => a.start - b.start);
+    const clean = [];
+    let lastEnd = -1;
+    matches.forEach(m => { if (m.start >= lastEnd) { clean.push(m); lastEnd = m.end; } });
+    return clean;
   }
-  if(c.squad && c.squad.length){
-    html += `<div class="modal-meta-row"><div class="modal-meta-group"><h5>Time multidisciplinar</h5><div class="tags">${c.squad.map(s => `<span class="tag">${s}</span>`).join('')}</div></div></div>`;
+  function highlightTextNode(node){
+    const text = node.nodeValue;
+    const matches = findKeywordMatches(text);
+    if (!matches.length) return;
+    const frag = document.createDocumentFragment();
+    let cursor = 0;
+    matches.forEach(m => {
+      if (m.start > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, m.start)));
+      const mark = document.createElement('mark');
+      mark.className = 'cso-kw';
+      mark.textContent = text.slice(m.start, m.end);
+      frag.appendChild(mark);
+      cursor = m.end;
+    });
+    if (cursor < text.length) frag.appendChild(document.createTextNode(text.slice(cursor)));
+    node.parentNode.replaceChild(frag, node);
   }
-  if(c.sections && c.sections.length){
-    html += '<div class="modal-sections-label">Aprofunde-se no case</div>';
-    c.sections.forEach((s, i) => {
-      html += `<div class="acc-item${i===0 ? ' open' : ''}">
-        <div class="acc-head" data-acc>
-          <h4>${s[0]}</h4>
-          <span class="acc-chevron">+</span>
-        </div>
-        <div class="acc-body"><div class="acc-body-inner">${s[1]}</div></div>
+  function highlightKeywords(root){
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(n){
+        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if (n.parentElement && n.parentElement.closest('a, mark.cso-kw, script, style')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(highlightTextNode);
+  }
+
+  function detectLayout(html){
+    if (html.indexOf('hyp-grid') !== -1) return 'grid';
+    if (html.indexOf('case-photos') !== -1) return 'photo';
+    if (html.indexOf('video-embed') !== -1) return 'video';
+    if (html.indexOf('case-links') !== -1) return 'links';
+    return 'narrative';
+  }
+
+  // Slide 1 = capa (headline + desafio + métricas); 1 slide por seção (texto integral, com fase e layout detectados);
+  // último slide = tradução estratégica ("o que isso significa para o funil").
+  function buildSlides(caseObj){
+    const phases = CASE_PHASES[activeCaseKey] || [];
+    const topMetric = (caseObj.metrics && caseObj.metrics[0]) || null;
+    const list = [{
+      kind:'intro', phaseKey:'cover',
+      company: caseObj.company, eyebrow: caseObj.eyebrow, title: caseObj.title,
+      text: caseObj.challenge, metrics: caseObj.metrics, squad: caseObj.squad
+    }];
+    (caseObj.sections || []).forEach((s, i) => {
+      const phaseKey = phases[i] || 'context';
+      list.push({ kind:'section', phaseKey, sectionTitle: s[0], html: s[1], topMetric, num: list.length + 1 });
+    });
+    if (caseObj.translation) list.push({ kind:'translation', phaseKey:'synthesis', text: caseObj.translation, num: list.length + 1 });
+    return list;
+  }
+
+  function coverMarkup(slide){
+    const t = uiText[currentLang] || uiText.pt;
+    const metricsHtml = (slide.metrics && slide.metrics.length)
+      ? '<div class="cso-metrics">' + slide.metrics.map(m => `<div><div class="n">${m[0]}</div><div class="l">${m[1]}</div></div>`).join('') + '</div>'
+      : '';
+    const squadHtml = (slide.squad && slide.squad.length)
+      ? '<div class="cso-squad">' + slide.squad.map(s => `<span>${s}</span>`).join('') + '</div>'
+      : '';
+    return `<div class="cso-inner layout-cover">
+      <div class="cso-cover-glow" aria-hidden="true"></div>
+      <svg class="cso-cover-chart" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+        <polyline points="0,104 55,92 110,96 165,64 220,72 275,34 330,42 400,8"></polyline>
+        <circle class="cso-cover-dot" cx="400" cy="8" r="4"></circle>
+        <circle class="cso-cover-pulse" cx="400" cy="8" r="4"></circle>
+      </svg>
+      <div class="cso-cover-top">
+        <div class="case-company">${slide.company || ''}</div>
+        <div class="cso-eyebrow">${slide.eyebrow || ''}</div>
+      </div>
+      <h3 class="cso-cover-title">${slide.title || ''}</h3>
+      <p class="cso-cover-lede">${slide.text || ''}</p>
+      ${metricsHtml}
+      ${squadHtml}
+      <div class="cso-cover-hint">${t.hint}</div>
+    </div>`;
+  }
+
+  function sectionMarkup(slide){
+    const layout = detectLayout(slide.html);
+    const meta = PHASE_META[slide.phaseKey] || PHASE_META.context;
+    const label = meta[currentLang] || meta.pt;
+    const amber = slide.phaseKey === 'result' || slide.phaseKey === 'proof';
+    const resultStat = (slide.phaseKey === 'result' && slide.topMetric)
+      ? `<div class="cso-result-stat"><div class="n">${slide.topMetric[0]}</div><div class="l">${slide.topMetric[1]}</div></div>`
+      : '';
+    return `<div class="cso-inner layout-${layout}">
+      <div class="cso-slide-ghost" aria-hidden="true">${String(slide.num).padStart(2, '0')}</div>
+      <div class="cso-phase-tag${amber ? ' amber' : ''}">${label}</div>
+      <h3 class="cso-section-title">${slide.sectionTitle}</h3>
+      ${resultStat}
+      <div class="cso-text">${slide.html}</div>
+    </div>`;
+  }
+
+  function synthesisMarkup(slide){
+    const t = uiText[currentLang] || uiText.pt;
+    const meta = PHASE_META.synthesis;
+    const label = meta[currentLang] || meta.pt;
+    return `<div class="cso-inner layout-synthesis">
+      <div class="cso-phase-tag light">${label}</div>
+      <p class="cso-synthesis-quote">${slide.text}</p>
+      <button class="cso-synthesis-back" id="csoBackToGrid" type="button">${t.backToCases}</button>
+    </div>`;
+  }
+
+  function slideMarkup(slide){
+    if (slide.kind === 'intro') return coverMarkup(slide);
+    if (slide.kind === 'translation') return synthesisMarkup(slide);
+    return sectionMarkup(slide);
+  }
+
+  function railStepMeta(slide){
+    const meta = PHASE_META[slide.phaseKey] || PHASE_META.context;
+    return { label: meta[currentLang] || meta.pt, amber: slide.phaseKey === 'result' || slide.phaseKey === 'proof' };
+  }
+
+  function renderRail(){
+    railEl.innerHTML = slides.map((s, i) => {
+      const m = railStepMeta(s);
+      const isLast = i === slides.length - 1;
+      return `<div class="cso-rail-step" data-idx="${i}">
+        <button class="cso-rail-dot${m.amber ? ' amber' : ''}" type="button" aria-label="${m.label}"></button>
+        <span class="cso-rail-label">${m.label}</span>
+        ${isLast ? '' : '<span class="cso-rail-line"></span>'}
       </div>`;
+    }).join('');
+    railEl.querySelectorAll('.cso-rail-step').forEach(step => {
+      step.querySelector('.cso-rail-dot').addEventListener('click', () => goTo(parseInt(step.getAttribute('data-idx'), 10)));
     });
   }
-  if(c.translation){
-    html += `<div class="modal-translation"><b>Tradução para o funil:</b> ${c.translation}</div>`;
-  }
-  modalBody.innerHTML = html;
 
-  modalBody.querySelectorAll('.acc-head').forEach(head => {
-    head.addEventListener('click', () => {
-      head.closest('.acc-item').classList.toggle('open');
+  function renderTrack(){
+    track.innerHTML = slides.map(s => `<div class="cso-slide">${slideMarkup(s)}</div>`).join('');
+    track.querySelectorAll('.cso-text, .cso-cover-lede, .cso-synthesis-quote').forEach(el => highlightKeywords(el));
+    dotsEl.innerHTML = slides.map((_, i) => `<button class="cso-dot" type="button" data-idx="${i}" aria-label="${i + 1}"></button>`).join('');
+    dotsEl.querySelectorAll('.cso-dot').forEach(dot => {
+      dot.addEventListener('click', () => goTo(parseInt(dot.getAttribute('data-idx'), 10)));
     });
+    const backBtn = track.querySelector('#csoBackToGrid');
+    if (backBtn) backBtn.addEventListener('click', closeCase);
+    renderRail();
+  }
+
+  function updateUI(){
+    const t = uiText[currentLang] || uiText.pt;
+    closeBtn.setAttribute('aria-label', t.close);
+    prevBtn.setAttribute('aria-label', t.prev);
+    nextBtn.setAttribute('aria-label', t.next);
+    counterEl.textContent = t.counter(slideIndex + 1, slides.length);
+    prevBtn.disabled = slideIndex === 0;
+    nextBtn.disabled = slideIndex === slides.length - 1;
+
+    dotsEl.querySelectorAll('.cso-dot').forEach((dot, i) => dot.classList.toggle('active', i === slideIndex));
+    railEl.querySelectorAll('.cso-rail-step').forEach((step, i) => {
+      step.classList.toggle('active', i === slideIndex);
+      step.classList.toggle('done', i < slideIndex);
+    });
+    railEl.querySelectorAll('.cso-rail-line').forEach((line, i) => line.classList.toggle('done', i < slideIndex));
+
+    overlay.classList.toggle('cso-light', !!(slides[slideIndex] && slides[slideIndex].kind === 'translation'));
+
+    track.style.transform = `translateX(-${slideIndex * 100}%)`;
+
+    // Retrigger da animação de entrada apenas no slide ativo (um único momento orquestrado, não decoração espalhada).
+    const slideEls = track.querySelectorAll('.cso-slide');
+    slideEls.forEach(el => el.classList.remove('cso-active'));
+    requestAnimationFrame(() => {
+      const current = slideEls[slideIndex];
+      if (current) current.classList.add('cso-active');
+    });
+  }
+
+  function goTo(i){
+    if (i < 0 || i >= slides.length) return; // nunca avança além do array
+    slideIndex = i;
+    updateUI();
+  }
+
+  function openCase(key){
+    const c = casesI18n[currentLang][key];
+    if (!c) return;
+    activeCaseKey = key;
+    slides = buildSlides(c);
+    slideIndex = 0;
+    renderTrack();
+    updateUI();
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCase(){
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  // Chamada por applyLanguage() ao trocar idioma com o overlay aberto.
+  // Reconstroi o conteúdo (e as fases, já traduzidas) no novo idioma mantendo o slide atual.
+  window.syncCaseOverlayLanguage = function(){
+    if (!overlay.classList.contains('open') || !activeCaseKey) return;
+    const c = casesI18n[currentLang][activeCaseKey];
+    if (!c) return;
+    slides = buildSlides(c);
+    if (slideIndex > slides.length - 1) slideIndex = slides.length - 1;
+    renderTrack();
+    updateUI();
+  };
+
+  document.querySelectorAll('[data-case]').forEach(el => {
+    el.addEventListener('click', () => openCase(el.getAttribute('data-case')));
+  });
+  closeBtn.addEventListener('click', closeCase);
+  prevBtn.addEventListener('click', () => goTo(slideIndex - 1));
+  nextBtn.addEventListener('click', () => goTo(slideIndex + 1));
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCase(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') closeCase();
+    else if (e.key === 'ArrowRight') goTo(slideIndex + 1);
+    else if (e.key === 'ArrowLeft') goTo(slideIndex - 1);
   });
 
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  overlay.scrollTop = 0;
-}
-function closeCase(){
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.querySelectorAll('[data-case]').forEach(el => {
-  el.addEventListener('click', () => openCase(el.getAttribute('data-case')));
-});
-modalClose.addEventListener('click', closeCase);
-overlay.addEventListener('click', (e) => { if(e.target === overlay) closeCase(); });
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeCase(); });
+  // Swipe (mobile)
+  let touchStartX = null;
+  overlay.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive:true });
+  overlay.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) dx < 0 ? goTo(slideIndex + 1) : goTo(slideIndex - 1);
+    touchStartX = null;
+  }, { passive:true });
+})();
 
 // ---- i18n system ----
 const containerIds = ['i18n-hero','i18n-pilares','i18n-penso','i18n-comp','i18n-ia','i18n-recom-head','i18n-formacao-list','i18n-cert-list'];
@@ -2423,6 +2898,7 @@ const smallText = {
 
 function applyLanguage(lang) {
   currentLang = lang;
+  if (typeof syncCaseOverlayLanguage === 'function') syncCaseOverlayLanguage();
   document.documentElement.lang = lang === 'pt' ? 'pt-BR' : (lang === 'en' ? 'en' : 'es');
 
   containerIds.forEach(id => {
